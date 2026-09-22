@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Rating Dashboard</title>
+    <style>
+        :root {
+            --bg-1: #060816;
+            --bg-2: #0e172d;
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-strong: rgba(17, 24, 39, 0.95);
+            --line: rgba(148, 163, 184, 0.22);
+            --text: #edf2ff;
+            --muted: #a6b5d6;
+            --gold: #fbbf24;
+            --gold-soft: #f59e0b;
+            --cyan: #67e8f9;
+            --purple: #8b5cf6;
+            --green: #34d399;
+            --shadow: 0 18px 45px rgba(9, 13, 27, 0.6);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(103, 232, 249, 0.18), transparent 28%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            color: var(--text);
+            margin: 0;
+            padding: 32px 24px 48px;
+        }
+
+        .shell {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .top-box {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.82));
+            border: 1px solid var(--line);
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            padding: 28px 30px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(103, 232, 249, 0.08));
+            pointer-events: none;
+        }
+
+        .top-box > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 3vw, 3rem);
+            letter-spacing: 0.02em;
+        }
+
+        .subline {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .top-movie {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(15, 118, 110, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .top-movie .score {
+            font-size: 1.5rem;
+            color: var(--gold);
+            text-shadow: 0 0 18px rgba(251, 191, 36, 0.4);
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 24px 0 30px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar label {
+            font-size: 0.82rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .toolbar select,
+        .toolbar input,
+        .toolbar button {
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text);
+            padding: 12px 14px;
+            font-size: 0.98rem;
+        }
+
+        .toolbar select {
+            min-width: 220px;
+        }
+
+        .toolbar input {
+            width: 120px;
+            text-align: center;
+        }
+
+        .toolbar button {
+            border: none;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 12px 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 28px rgba(139, 92, 246, 0.38);
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(103, 232, 249, 0.26);
+        }
+
+        .status-strip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.9);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(17, 24, 39, 0.88));
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(251, 191, 36, 0.44);
+            box-shadow: 0 22px 50px rgba(10, 14, 26, 0.72);
+        }
+
+        .poster {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .poster-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(139,92,246,0.45), rgba(34,197,94,0.26));
+            font-size: 3rem;
+        }
+
+        .content {
+            padding: 16px 16px 18px;
+        }
+
+        .title {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        .score {
+            color: var(--gold);
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            text-shadow: 0 0 18px rgba(251, 191, 36, 0.4);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--green);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .status::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.9);
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 14px 40px; }
+            .top-box { padding: 22px 18px; }
+            .toolbar { padding: 14px; }
+            .toolbar select, .toolbar input, .toolbar button { width: 100%; }
+            .status-strip { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <div class="top-box">
+            <h1>🎬 Live Movie Poster Scoreboard</h1>
+            <p class="subline">Realtime movie ratings across every connected viewer</p>
+            {% if top_movie %}
+                <div class="top-movie">
+                    <span>Top movie:</span>
+                    <strong>{{ top_movie.title }}</strong>
+                    <span class="score">{{ top_movie.rating }}</span>
+                    <span>/10</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <form id="rating-form" class="toolbar">
+            <div>
+                <label for="movie-select">Movie</label>
+                <select id="movie-select">
+                    {% for movie in movies %}
+                        <option value="{{ movie.id }}">{{ movie.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="rating-input">Rating</label>
+                <input id="rating-input" type="number" min="0" max="10" step="0.1" value="9.5" />
+            </div>
+
+            <button type="submit">Update rating</button>
+
+            <div class="status-strip">
+                <span class="dot"></span>
+                Live stream
+            </div>
+        </form>
+
+        <div class="grid">
+            {% for movie in movies %}
+            <div class="card" data-movie-id="{{ movie.id }}">
+                {% if movie.poster_url %}
+                    <img class="poster" src="{{ movie.poster_url }}" alt="{{ movie.title }} poster">
+                {% else %}
+                    <div class="poster poster-empty">🎞️</div>
+                {% endif %}
+                <div class="content">
+                    <h2 class="title">{{ movie.title }}</h2>
+                    <div class="meta">
+                        <div class="score" data-score="{{ movie.rating }}">{{ movie.rating }}</div>
+                        <div class="status">Live</div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No movies yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        const updateScoreCard = (movieId, rating) => {
+            const card = document.querySelector(`[data-movie-id="${movieId}"]`);
+            if (!card) return;
+
+            const scoreEl = card.querySelector('[data-score]');
+            if (scoreEl) {
+                scoreEl.textContent = rating;
+                scoreEl.dataset.score = rating;
+            }
+        };
+
+        const refreshMovieScores = () => {
+            document.querySelectorAll('[data-movie-id]').forEach(async (card) => {
+                const id = card.dataset.movieId;
+                try {
+                    const response = await fetch(`/movies/api/${id}/`);
+                    const data = await response.json();
+                    updateScoreCard(data.id, data.rating);
+                } catch (error) {
+                    console.error('Failed to update movie rating', error);
+                }
+            });
+        };
+
+        const source = new EventSource('/movies/events/');
+        source.addEventListener('movie-update', (event) => {
+            const data = JSON.parse(event.data);
+            updateScoreCard(data.id, data.rating);
+        });
+
+        document.getElementById('rating-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const movieId = document.getElementById('movie-select').value;
+            const rating = document.getElementById('rating-input').value;
+
+            const response = await fetch(`/movies/api/${movieId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ rating: Number(rating) })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                alert(data.error || 'Failed to update rating');
+                return;
+            }
+
+            updateScoreCard(data.id, data.rating);
+            source.dispatchEvent(new MessageEvent('movie-update', { data: JSON.stringify({ id: data.id, rating: data.rating }) }));
+        });
+
+        setInterval(refreshMovieScores, 4000);
+    </script>
+</body>
+</html>

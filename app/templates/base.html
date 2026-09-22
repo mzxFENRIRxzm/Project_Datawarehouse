@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Suphasan Platform{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <header>
+        <div class="navbar">
+            <a href="{% url 'sale:index' %}" class="brand">
+                <i class="fa-solid fa-cube"></i> Suphasan
+            </a>
+            
+            <ul class="nav-links">
+                <!-- Check request path to highlight the active menu item -->
+                <li class="{% if request.path == '/' or 'sale' in request.path %}active{% endif %}">
+                    <a href="{% url 'sale:index' %}">
+                        <i class="fa-solid fa-store"></i> หน้าเว็บขาย
+                    </a>
+                </li>
+                <li class="{% if 'inventory' in request.path %}active{% endif %}">
+                    <a href="{% url 'inventory:dashboard' %}">
+                        <i class="fa-solid fa-boxes-stacked"></i> คลังสินค้า
+                    </a>
+                </li>
+                <li class="{% if 'marketing' in request.path %}active{% endif %}">
+                    <a href="{% url 'marketing:dashboard' %}">
+                        <i class="fa-solid fa-bullhorn"></i> ระบบการตลาด
+                    </a>
+                </li>
+                <li class="{% if 'logistics' in request.path %}active{% endif %}">
+                    <a href="{% url 'logistics:dashboard' %}">
+                        <i class="fa-solid fa-truck-fast"></i> การขนส่ง
+                    </a>
+                </li>
+                <li class="{% if 'analytics' in request.path %}active{% endif %}">
+                    <a href="{% url 'analytics:dashboard' %}">
+                        <i class="fa-solid fa-chart-line"></i> Analytics
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle-info"></i>
+                    {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Suphasan Platform. Built with Python (uv), Django, and Premium Vanilla CSS.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

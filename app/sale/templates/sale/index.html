@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}หน้าเว็บขายสินค้า - Suphasan{% endblock %}
+
+{% block content %}
+<div class="storefront-hero" style="margin-bottom: 2.5rem; text-align: center; padding: 3rem 1rem; background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%); border-radius: 24px; border: 1px solid var(--border-color);">
+    <h1 class="section-title" style="margin-bottom: 0.5rem;">ยินดีต้อนรับสู่ <span class="text-gradient">Suphasan Storefront</span></h1>
+    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">เลือกซื้อสินค้าพรีเมียมคุณภาพสูง พร้อมระบบชำระเงินด่วนและการจัดส่งแบบอัจฉริยะ ทันใจในขั้นตอนเดียว</p>
+</div>
+
+<div class="grid grid-2" style="grid-template-columns: 2fr 1fr; align-items: start;">
+    
+    <!-- ฝั่งแสดงสินค้า -->
+    <div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-bag-shopping" style="color: var(--color-primary);"></i> รายการสินค้าทั้งหมด
+        </h2>
+        
+        <div class="grid grid-2">
+            {% for product in products %}
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                    <div>
+                        <!-- Mock Product Image -->
+                        <div style="width: 100%; height: 160px; background: linear-gradient(45deg, #1e1b4b, #312e81); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: rgba(255,255,255,0.15); margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05); position: relative;">
+                            <i class="fa-solid fa-laptop-code"></i>
+                            <span style="position: absolute; top: 8px; right: 8px; font-size: 0.75rem; background-color: rgba(0,0,0,0.5); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--text-secondary);">
+                                SKU: {{ product.sku }}
+                            </span>
+                        </div>
+                        
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ product.name }}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem; height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ product.description|default:"ไม่มีคำอธิบายสินค้าเพิ่มเติม" }}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="font-size: 1.4rem; font-weight: 800; color: var(--color-secondary);">฿{{ product.price }}</span>
+                            {% if product.stock.quantity > 0 %}
+                                <span class="badge badge-success">มีของในคลัง ({{ product.stock.quantity }})</span>
+                            {% else %}
+                                <span class="badge badge-danger">หมดสต็อก</span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if product.stock.quantity > 0 %}
+                            <a href="{% url 'sale:add_to_cart' product.id %}" class="btn btn-primary" style="width: 100%;">
+                                <i class="fa-solid fa-cart-plus"></i> เพิ่มลงตะกร้า
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary" style="width: 100%; cursor: not-allowed;" disabled>
+                                <i class="fa-solid fa-ban"></i> สินค้าหมด
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="card" style="grid-column: span 2; text-align: center; padding: 3rem;">
+                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-secondary);">ยังไม่มีสินค้าจัดจำหน่ายในขณะนี้ กรุณาเปิดระบบคลังสินค้าหลังบ้านเพื่อเพิ่มสินค้าใหม่</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- ฝั่งตะกร้าสินค้าและการชำระเงิน -->
+    <div class="card" style="background: var(--gradient-card); border-color: rgba(255,255,255,0.05);">
+        <h2 style="font-size: 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+            <i class="fa-solid fa-cart-shopping" style="color: var(--color-secondary);"></i> ตะกร้าสินค้า
+            {% if cart.items.exists %}
+                <span class="cart-floating-badge" style="vertical-align: middle;">{{ cart.items.count }}</span>
+            {% endif %}
+        </h2>
+        
+        <!-- รายการของในตะกร้า -->
+        {% if cart.items.exists %}
+            <div style="margin-bottom: 1.5rem;">
+                {% for item in cart.items.all %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px dashed rgba(255,255,255,0.05);">
+                        <div style="max-width: 70%;">
+                            <h4 style="font-size: 0.95rem; margin-bottom: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.product.name }}</h4>
+                            <span style="font-size: 0.85rem; color: var(--text-secondary);">฿{{ item.product.price }} x {{ item.quantity }}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">฿{{ item.subtotal }}</span>
+                            <a href="{% url 'sale:remove_from_cart' item.id %}" style="color: var(--color-danger); font-size: 0.85rem;" title="ลบสินค้า">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- ใช้คูปองส่วนลด -->
+            <form action="{% url 'sale:apply_coupon' %}" method="post" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+                {% csrf_token %}
+                <label class="form-label" for="coupon_input">คูปองส่วนลด</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="coupon_input" name="coupon_code" class="form-control" placeholder="ใส่รหัสคูปอง (เช่น WELCOME10)" value="{{ coupon.code|default:'' }}" style="text-transform: uppercase;">
+                    {% if coupon %}
+                        <button type="submit" name="action" value="clear" class="btn btn-secondary btn-sm" style="padding: 0 1rem;">ยกเลิก</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary btn-sm" style="padding: 0 1rem;">ใช้</button>
+                    {% endif %}
+                </div>
+                {% if coupon %}
+                    <span style="font-size: 0.8rem; color: var(--color-success); display: block; margin-top: 0.4rem;">
+                        <i class="fa-solid fa-circle-check"></i> ได้รับส่วนลด {{ coupon.value }}{% if coupon.discount_type == 'percentage' %}%{% else %} บาท{% endif %}
+                    </span>
+                {% endif %}
+            </form>
+            
+            <!-- ยอดคำนวณเงิน -->
+            <div style="margin-bottom: 1.5rem; background-color: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; font-size: 0.95rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-secondary);">ยอดรวมสินค้า:</span>
+                    <span>฿{{ subtotal }}</span>
+                </div>
+                {% if discount > 0 %}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--color-success);">
+                        <span>ส่วนลดคูปอง:</span>
+                        <span>-฿{{ discount }}</span>
+                    </div>
+                {% endif %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-secondary);">ค่าจัดส่งแบบคงที่:</span>
+                    <span>฿{{ shipping_cost }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.15rem; color: var(--color-secondary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.5rem;">
+                    <span>ราคาสุทธิ:</span>
+                    <span>฿{{ total_with_shipping }}</span>
+                </div>
+            </div>
+            
+            <!-- ฟอร์มการชำระเงิน (Checkout) -->
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-user-pen"></i> รายละเอียดการจัดส่งและชำระเงิน</h3>
+            <form action="{% url 'sale:checkout' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="customer_name">ชื่อ-นามสกุลผู้รับ</label>
+                    <input type="text" id="customer_name" name="customer_name" class="form-control" placeholder="สมชาย ใจดี" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">อีเมล</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="somchai@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="phone">เบอร์โทรศัพท์ (มีผลต่อคะแนนสะสม)</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="0891234567" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="address">ที่อยู่จัดส่งโดยละเอียด</label>
+                    <textarea id="address" name="address" class="form-control" rows="3" placeholder="123/45 ถนนพัฒนาการ แขวงสวนหลวง เขตสวนหลวง กรุงเทพฯ 10250" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="payment_method">ช่องทางการชำระเงิน</label>
+                    <select id="payment_method" name="payment_method" class="form-control" required>
+                        <option value="promptpay">QR PromptPay (ชำระเงินอัตโนมัติ)</option>
+                        <option value="credit">บัตรเครดิต/เดบิต</option>
+                        <option value="cod">เก็บเงินปลายทาง (COD)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 1rem;">
+                    <i class="fa-solid fa-shield-halved"></i> สั่งซื้อและชำระเงิน
+                </button>
+            </form>
+        {% else %}
+            <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+                <i class="fa-solid fa-cart-flatbed" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                <p>ตะกร้าสินค้าว่างเปล่า</p>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem;">เลือกคลิก "เพิ่มลงตะกร้า" ที่สินค้าด้านซ้ายเพื่อสั่งซื้อ</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

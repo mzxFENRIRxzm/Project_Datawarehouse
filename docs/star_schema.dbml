@@ -1,0 +1,55 @@
+Project SuphasanGold {
+  database_type: 'SQLite'
+  Note: 'Gold model grain: one fact_sales row per order line.'
+}
+
+Table dim_date {
+  date_key integer [pk]
+  full_date date
+  year integer
+  quarter integer
+  month integer
+  is_weekend boolean
+}
+
+Table dim_customer {
+  customer_key varchar [pk]
+  customer_name varchar
+  customer_email varchar
+  customer_phone varchar
+  province varchar
+  total_orders integer
+  total_spent decimal
+}
+
+Table dim_product {
+  product_key varchar [pk]
+  product_name varchar
+  category varchar
+  current_price decimal
+}
+
+Table dim_payment {
+  payment_key varchar [pk]
+  payment_method varchar
+}
+
+Table fact_sales {
+  sale_key integer [pk]
+  date_key integer [not null]
+  order_id varchar [not null]
+  product_key varchar [not null]
+  customer_key varchar [not null]
+  payment_key varchar [not null]
+  quantity integer
+  unit_price decimal
+  line_total decimal
+  discount_amount decimal
+  net_revenue decimal
+  shipping_status varchar
+}
+
+Ref: fact_sales.date_key > dim_date.date_key
+Ref: fact_sales.product_key > dim_product.product_key
+Ref: fact_sales.customer_key > dim_customer.customer_key
+Ref: fact_sales.payment_key > dim_payment.payment_key
