@@ -126,6 +126,39 @@ In Airflow UI (http://localhost:8080):
 1. Enable the `suphasan_daily_etl` DAG
 2. Click **Trigger DAG** to run manually
 
+## Open Source Lakehouse Integration
+
+The complete Northwind-to-Iceberg-to-Superset workflow, including the
+`Featured Charts` dashboard and PowerShell commands, is in
+[`docs/lakehouse.md`](docs/lakehouse.md). Run that workflow for the supplied
+`project` folder; starting Trino alone does not load the files or create charts.
+
+The `project` Lakehouse stack is integrated into this Compose project without
+reusing the existing PostgreSQL, Airflow, or Superset host ports:
+
+| Component | Internal service | Host URL |
+|---|---|---|
+| MinIO API | `lakehouse-minio:9000` | http://localhost:9002 |
+| MinIO Console | `lakehouse-minio:9001` | http://localhost:9003 |
+| Hive Metastore | `lakehouse-hive-metastore:9083` | `localhost:9083` |
+| Trino SQL | `lakehouse-trino:8080` | http://localhost:8180 |
+
+The copied Northwind source files are under
+`data/landing/northwind_thai_large_data/`. Start the integrated services with:
+
+```bash
+docker compose --env-file .env up -d lakehouse-trino
+```
+
+In Superset, add a Trino database connection using
+`trino://trino@lakehouse-trino:8080/iceberg` from a container on
+`suphasan-network`, or `trino://trino@localhost:8180/iceberg` from the host.
+The `iceberg` catalog is configured for Hive Metastore and MinIO.
+
+The first startup builds a small Hive image locally to add the PostgreSQL JDBC
+driver required by the official Hive image. Change the Lakehouse credentials
+in `.env` before sharing the environment.
+
 ## 📁 Project Structure
 
 ```

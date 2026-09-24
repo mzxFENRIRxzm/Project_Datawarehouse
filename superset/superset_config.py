@@ -5,24 +5,23 @@ This file is mounted into the Superset container at /app/pythonpath/superset_con
 """
 
 import os
+from sqlalchemy.engine import URL
 
 # ---------------------------------------------------------------------------
 # Core Settings
 # ---------------------------------------------------------------------------
-SECRET_KEY = os.environ.get('SUPERSET_SECRET_KEY', 'change-me-in-production')
+SECRET_KEY = os.environ['SUPERSET_SECRET_KEY']
 APP_NAME = 'Suphasan Analytics'
 
 # ---------------------------------------------------------------------------
 # Database (PostgreSQL for metadata)
 # ---------------------------------------------------------------------------
-SQLALCHEMY_DATABASE_URI = (
-    f"postgresql://"
-    f"{os.environ.get('DATABASE_USER', 'suphasan')}:"
-    f"{os.environ.get('DATABASE_PASSWORD', 'suphasan2569')}@"
-    f"{os.environ.get('DATABASE_HOST', 'postgres')}:"
-    f"{os.environ.get('DATABASE_PORT', '5432')}/"
-    f"{os.environ.get('DATABASE_DB', 'superset_meta')}"
-)
+SQLALCHEMY_DATABASE_URI = URL.create(
+    'postgresql+psycopg2', username=os.environ['DATABASE_USER'],
+    password=os.environ['DATABASE_PASSWORD'], host=os.environ.get('DATABASE_HOST', 'postgres'),
+    port=int(os.environ.get('DATABASE_PORT', '5432')),
+    database=os.environ.get('DATABASE_DB', 'superset_meta'),
+).render_as_string(hide_password=False)
 
 # ---------------------------------------------------------------------------
 # Redis Cache
@@ -63,7 +62,7 @@ FEATURE_FLAGS = {
 # ---------------------------------------------------------------------------
 # Security & CORS
 # ---------------------------------------------------------------------------
-ENABLE_CORS = True
+ENABLE_CORS = False
 CORS_OPTIONS = {
     'supports_credentials': True,
     'allow_headers': ['*'],
